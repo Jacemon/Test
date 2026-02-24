@@ -1,0 +1,102 @@
+﻿@{
+    ViewData["Title"] = "Link Shorter";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Сократить новую ссылку</h2>
+    
+    <form asp-action="Create" method="post" class="row g-3 mb-5">
+        <div class="col-md-9">
+            <input type="url" name="longUrl" class="form-control form-control-lg" 
+                   placeholder="Вставьте длинный URL (https://...)" required>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary btn-lg w-100">Сократить</button>
+        </div>
+    </form>
+
+    @if (TempData["LastGeneratedUrl"] != null)
+    {
+        <div class="alert alert-success mt-3 shadow-sm animate__animated animate__fadeIn">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <i class="bi bi-magic me-2"></i>
+                    Готово! Ваша ссылка: 
+                    <strong id="last-url">@TempData["LastGeneratedUrl"]</strong>
+                </div>
+                <button class="btn btn-success btn-sm" 
+                        onclick="copyToClipboard('last-url', this)">
+                    <partial name="_CopyIcon" />
+                    Копировать
+                </button>
+            </div>
+        </div>
+    }
+    
+    <hr />
+
+    <h3 class="mt-4">Список ссылок</h3>
+    <table class="table table-hover mt-3">
+        <thead class="table-light">
+        <tr>
+            <th>Длинный URL</th>
+            <th>Сокращенный URL</th>
+            <th>Дата создания</th>
+            <th>Переходы</th>
+            <th>Управление</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="text-truncate" style="max-width: 300px;">
+                    <a href="@item.LongUrl" target="_blank">@item.LongUrl</a>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="url-@item.ShortCode" class="fw-bold">@Context.Request.Scheme://@Context.Request.Host/@item.ShortCode</span>
+                            
+                        <button class="btn btn-sm btn-outline-secondary border-0" 
+                                onclick="copyToClipboard('url-@item.ShortCode', this)" 
+                                title="Копировать">
+                            <partial name="_CopyIcon" />
+                        </button>
+                    </div>
+                </td>
+                <td>@item.CreatedAt.ToString("g")</td>
+                <td><span class="badge bg-info text-dark">@item.ClickCount</span></td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Редактировать</a>
+                            
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" 
+                              onsubmit="return confirm('Удалить эту ссылку?');" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+    function copyToClipboard(elementId, btn) {
+        const text = document.getElementById(elementId).innerText;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            const icon = btn.querySelector('i');
+            icon.classList.replace('bi-copy', 'bi-check-lg');
+            btn.classList.replace('btn-outline-secondary', 'btn-success');
+
+            setTimeout(() => {
+                icon.classList.replace('bi-check-lg', 'bi-copy');
+                btn.classList.replace('btn-success', 'btn-outline-secondary');
+            }, 1500);
+        });
+    }
+</script>
+}

@@ -1,0 +1,30 @@
+﻿@model LinkShorter.Models.ShortUrl
+@{
+    ViewData["Title"] = "Редактировать ссылку";
+}
+
+<div class="container mt-4">
+    <h2>Редактирование ссылки</h2>
+    <p class="text-muted">Короткий код: <strong>@Model.ShortCode</strong></p>
+
+    <div class="card p-4 shadow-sm">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="mb-3">
+                <label class="form-label">Длинный URL</label>
+                <input type="url" name="longUrl" value="@Model.LongUrl" 
+                       class="form-control form-control-lg" required />
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="text-danger mt-1">@Html.ValidationSummary(true)</div>
+                }
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">Сохранить изменения</button>
+                <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>

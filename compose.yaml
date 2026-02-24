@@ -1,0 +1,22 @@
+﻿services:
+  linkshorter:
+    image: linkshorter
+    build:
+      context: .
+      dockerfile: LinkShorter/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=shortener_db;User=root;Password=root_password;
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: shortener_db
+    ports:
+      - "3306:3306"
