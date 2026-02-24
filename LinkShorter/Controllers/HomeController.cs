@@ -86,10 +86,11 @@ public class HomeController (
         if (urlEntry != null)
         {
             cache.Remove(urlEntry.ShortCode);
+            buffer.Remove(urlEntry.ShortCode);
             context.Urls.Remove(urlEntry);
             await context.SaveChangesAsync();
         }
-
+        
         return RedirectToAction(nameof(Index));
     }
 

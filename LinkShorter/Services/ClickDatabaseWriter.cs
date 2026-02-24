@@ -5,7 +5,8 @@ namespace LinkShorter.Services;
 
 public class ClickDatabaseWriter(
     ClickBuffer buffer, 
-    IServiceScopeFactory scopeFactory) : BackgroundService
+    IServiceScopeFactory scopeFactory
+) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

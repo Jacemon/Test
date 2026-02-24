@@ -11,6 +11,11 @@ public class ClickBuffer
         _clicks.AddOrUpdate(code, 1, (_, count) => count + 1);
     }
 
+    public void Remove(string code)
+    {
+        _clicks.TryRemove(code, out _);
+    }
+
     public IDictionary<string, int> Flush()
     {
         var currentClicks = _clicks.ToArray();
