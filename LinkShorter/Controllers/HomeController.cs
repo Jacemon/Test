@@ -9,6 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace LinkShorter.Controllers;
 
 public class HomeController (
+        ClickBuffer buffer,
         AppDbContext context,
         UrlShortenerService shortenerService,
         IMemoryCache cache //TODO? Заменить на Redis
@@ -110,13 +111,7 @@ public class HomeController (
             cache.Set(code, longUrl, cacheEntryOptions);
         }
 
-        _ = Task.Run(async () => {
-            var entry = await context.Urls.FirstOrDefaultAsync(u => u.ShortCode == code);
-            if (entry != null) {
-                entry.ClickCount++;
-                await context.SaveChangesAsync();
-            }
-        });
+        buffer.AddClick(code);
 
         return Redirect(longUrl!);
     }

@@ -4,12 +4,10 @@ namespace LinkShorter.Data;
 
 using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext : DbContext
+public class AppDbContext(
+    DbContextOptions<AppDbContext> options
+) : DbContext(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
-    
     public DbSet<ShortUrl> Urls { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -14,6 +14,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<UrlShortenerService>();
+builder.Services.AddSingleton<ClickBuffer>();
+builder.Services.AddHostedService<ClickDatabaseWriter>();
 
 var app = builder.Build();
 
@@ -47,7 +49,6 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-// TODO
 app.MapControllerRoute(
     name: "short-url",
     pattern: "{code}",
