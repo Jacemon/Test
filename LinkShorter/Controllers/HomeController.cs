@@ -21,31 +21,40 @@ public class HomeController (
         if (string.IsNullOrEmpty(longUrl) || !Uri.IsWellFormedUriString(longUrl, UriKind.Absolute))
         {
             ModelState.AddModelError("", "Введите корректную ссылку (начиная с http/https)");
-            return View("Index", await context.Urls.ToListAsync());
+            return View("Index", await context.Urls.ToListAsync()); ;
         }
         
-        string code;
-        do
-        {
-            code = shortenerService.GenerateCode();
-        } while (await context.Urls.AnyAsync(u => u.ShortCode == code));
+        var maxRetries = 5;
+        var retryCount = 0;
         
-        var newUrl = new ShortUrl
+        while (retryCount < maxRetries)
         {
-            LongUrl = longUrl,
-            ShortCode = code,
-            CreatedAt = DateTime.UtcNow,
-            ClickCount = 0
-        };
-
-        context.Add(newUrl);
-        await context.SaveChangesAsync();
-
-        var shortUrl = $"{Request.Scheme}://{Request.Host}/{newUrl.ShortCode}";
-        TempData["LastGeneratedUrl"] = shortUrl;
-        TempData["LastShortCode"] = newUrl.ShortCode;
+            var newUrl = new ShortUrl
+            {
+                ShortCode = shortenerService.GenerateCode(),
+                LongUrl = longUrl,
+                CreatedAt = DateTime.UtcNow,
+                ClickCount = 0
+            };
+            
+            try
+            {
+                context.Urls.Add(newUrl);
+                await context.SaveChangesAsync();
+            
+                var shortUrl = $"{Request.Scheme}://{Request.Host}/r/{newUrl.ShortCode}";
+                TempData["LastGeneratedUrl"] = shortUrl;
+                TempData["LastShortCode"] = newUrl.ShortCode;
         
-        return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                context.Entry(newUrl).State = EntityState.Detached;
+                retryCount++;
+            }
+        }
+        throw new Exception("Failed to generate a unique short code after several attempts.");
     }
     
     [HttpGet]
@@ -95,7 +104,7 @@ public class HomeController (
     }
 
     
-    [HttpGet("/{code}")]
+    [HttpGet("/r/{code}")]
     public async Task<IActionResult> RedirectTo(string code)
     {
         if (!cache.TryGetValue(code, out string? longUrl))

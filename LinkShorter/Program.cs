@@ -30,7 +30,8 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred when creating or migrating the database.");
+        logger.LogCritical(ex, "An error occurred when creating or migrating the database.");
+        throw;
     }
 }
 
@@ -48,11 +49,6 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "short-url",
-    pattern: "{code}",
-    defaults: new { controller = "Home", action = "RedirectTo" });
 
 app.MapControllerRoute(
         name: "default",

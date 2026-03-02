@@ -1,4 +1,6 @@
-﻿namespace LinkShorter.Services;
+﻿using System.Security.Cryptography;
+
+namespace LinkShorter.Services;
 
 public class UrlShortenerService
 {
@@ -8,6 +10,7 @@ public class UrlShortenerService
     public string GenerateCode(int length = 6)
     {
         return new string(Enumerable.Repeat(Chars, length)
-            .Select(s => s[Random.Shared.Next(s.Length)]).ToArray());
+            .Select(s => s[RandomNumberGenerator.GetInt32(Chars.Length)])
+            .ToArray());
     }
 }
